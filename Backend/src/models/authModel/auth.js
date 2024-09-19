@@ -6,7 +6,7 @@ const authSchema = new Schema(
     firebaseId: {
       type: String,
       required: false,
-      unique:true
+      unique: true,
     },
     name: {
       type: String,
