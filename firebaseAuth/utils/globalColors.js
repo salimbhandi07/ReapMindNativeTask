@@ -1,0 +1,40 @@
+export const globalColors = {
+  primaryTheme: '#003384',
+  white: '#ffffff',
+  black: '#000000',
+  grey: '#898186',
+  blacktext: '#000000',
+  shadedPrimary: '#C70679',
+  completed: '#007E2F',
+  lightGrey: '#898186',
+  lightGreen: '#DCEFE4',
+  darkGreen: '#007E2F',
+  lightPrimary: '#EC008C2B',
+  yellow: '#FFB520',
+  whiteGrey: '#EEEEEE',
+  textGrey: '#898186',
+  red: 'red',
+};
+
+
+// export const globalColors = {
+//   primaryTheme: '#264596',
+//   backgroundTheme: '#12B0E8',
+//   white: '#ffffff',
+//   black: '#000000',
+//   grey: '#898186',
+//   blacktext: '#000000',
+//   shadedPrimary: '#C70679',
+//   completed: '#007E2F',
+//   lightGrey: '#D3D3D3',
+//   lightGreen: '#50C878',
+//   darkGreen: '#007E2F',
+//   modal: '#0009',
+//   yellow: '#FFB520',
+//   whiteGrey: '#EEEEEE',
+//   textGrey: '#898186',
+//   golden: '#ffd700',
+//   red: 'red',
+
+//   card2: '#fff',
+// };
