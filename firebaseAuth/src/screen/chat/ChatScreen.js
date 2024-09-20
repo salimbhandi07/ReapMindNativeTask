@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -8,20 +8,25 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Keyboard,
+  KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import io from 'socket.io-client';
 import axios from 'axios';
 import UserAvatar from 'react-native-user-avatar';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 
 const ChatScreen = ({route, navigation}) => {
   const {userId, userName} = route.params;
   const dispatch = useDispatch();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [isShowModal, setIsShowModal] = useState(false);
 
@@ -87,6 +92,22 @@ const ChatScreen = ({route, navigation}) => {
     setIsShowModal(false);
     Keyboard.dismiss();
   };
+  const [isTextInputActive, setIsTextInputActive] = useState(false);
+  const textInputRef = useRef(null);
+
+  const showKeyBoard = () => {
+    console.log('IIIIIIIIIIIi', textInputRef.current);
+
+    if (textInputRef.current) {
+      textInputRef.current.focus(); // Focus the TextInput to open the keyboard
+    }
+    // setShowEmojiPicker(false); // Optionally hide the emoji picker
+  };
+
+  const showEmoji = () => {
+    Keyboard.dismiss();
+    setShowEmojiPicker(!showEmojiPicker); // Toggle the emoji picker
+  };
 
   const renderMessage = ({item}) => {
     const isSentByCurrentUser = item.senderId === id;
@@ -118,41 +139,82 @@ const ChatScreen = ({route, navigation}) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{flexDirection: 'row', gap: 5, alignItems: 'center'}}>
-          <Icon name="arrow-back" size={24} color="#000" />
-          <UserAvatar size={37} name={userName} />
-          <Text style={styles.headerText}>{userName}</Text>
-        </TouchableOpacity>
-        {selectedMessage && selectedMessage.senderId === id && (
-          <TouchableOpacity onPress={handleDeleteMessage}>
-            <Icon name="trash" size={24} color="red" />
+    <KeyboardAvoidingView
+      style={{flex: 1}}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.headerContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{flexDirection: 'row', gap: 5, alignItems: 'center'}}>
+            <Icon name="arrow-back" size={24} color="#000" />
+            <UserAvatar size={37} name={userName} />
+            <Text style={styles.headerText}>{userName}</Text>
           </TouchableOpacity>
+          {selectedMessage && selectedMessage.senderId === id && (
+            <TouchableOpacity onPress={handleDeleteMessage}>
+              <Icon name="trash" size={24} color="red" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={{flex: showEmojiPicker ? 0.9 : 1}}>
+          <FlatList
+            data={messages}
+            keyExtractor={item => item._id}
+            renderItem={renderMessage}
+            contentContainerStyle={styles.messagesList}
+            showsVerticalScrollIndicator={false}
+            onTouchStart={handleOutsidePress}
+            onFocus={() => setIsTextInputActive(true)} // Focus event
+            onBlur={() => setIsTextInputActive(true)} // Blur event
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            ref={textInputRef}
+            value={newMessage}
+            onChangeText={setNewMessage}
+            style={styles.input}
+            placeholder="Type your message..."
+            multiline
+            textAlignVertical="top"
+          />
+
+          {showEmojiPicker ? (
+            <TouchableOpacity onPress={showKeyBoard} style={styles.emojiButton}>
+              <MaterialCommunityIcons
+                name="keyboard-outline"
+                size={28}
+                color="#000"
+              />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={showEmoji} style={styles.emojiButton}>
+              <Icon name="happy-outline" size={24} color="#000" />
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+            <MaterialIcons name="send" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        {showEmojiPicker && (
+          <View style={styles.emojiPickerContainer}>
+            <EmojiSelector
+              onEmojiSelected={emoji => setNewMessage(prev => prev + emoji)}
+              category={Categories.ALL}
+              showSearchBar={false}
+              columns={8}
+              style={styles.emojiPicker}
+            />
+          </View>
         )}
-      </View>
-
-      <FlatList
-        data={messages}
-        keyExtractor={item => item._id}
-        renderItem={renderMessage}
-        contentContainerStyle={styles.messagesList}
-        showsVerticalScrollIndicator={false}
-        onTouchStart={handleOutsidePress} // Dismiss keyboard on touch start
-      />
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={newMessage}
-          onChangeText={setNewMessage}
-          style={styles.input}
-          placeholder="Type your message..."
-        />
-        <Button title="Send" onPress={sendMessage} />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -203,20 +265,39 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-    paddingVertical: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 25,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 10,
+    position: 'relative',
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginRight: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 40,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    fontSize: 16,
+    maxHeight: 170,
   },
-  selectedMessage: {
-    backgroundColor: '#948a8a',
+  emojiButton: {
+    position: 'absolute',
+    left: 25,
+    top: '50%',
+    transform: [{translateY: -6}],
+  },
+  sendButton: {
+    backgroundColor: '#25D366',
+    padding: 10,
+    borderRadius: 50,
+    marginLeft: 10,
+  },
+  emojiPickerContainer: {
+    height: 250,
+  },
+  emojiPicker: {
+    flex: 1,
   },
 });
 

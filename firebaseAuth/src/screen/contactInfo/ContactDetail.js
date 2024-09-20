@@ -1,17 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { Button } from '../../component/Button';
+import {View, Text, StyleSheet, ScrollView, Image} from 'react-native';
+import {useRoute, useNavigation} from '@react-navigation/native';
+import {Button} from '../../component/Button';
 
 const ContactDetail = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { contact } = route.params;
+  const {contact} = route.params;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Image source={{ uri: 'https://via.placeholder.com/100' }} style={styles.avatar} />
+        <Image
+          source={{uri: 'https://via.placeholder.com/100'}}
+          style={styles.avatar}
+        />
+
         <Text style={styles.name}>{contact?.name}</Text>
         <Text style={styles.email}>{contact?.email}</Text>
       </View>
@@ -20,20 +24,22 @@ const ContactDetail = () => {
         <DetailRow label="Street:" value={contact.address?.street || 'N/A'} />
         <DetailRow label="City:" value={contact.address?.city || 'N/A'} />
         <DetailRow label="State:" value={contact.address?.state || 'N/A'} />
-        <DetailRow label="Zip Code:" value={contact.address?.zipCode || 'N/A'} />
+        <DetailRow
+          label="Zip Code:"
+          value={contact.address?.zipCode || 'N/A'}
+        />
       </View>
-      <Button
-        onPress={() => navigation.goBack()}
-        title={'Back'}
-      />
+      <Button onPress={() => navigation.goBack()} title={'Back'} />
     </ScrollView>
   );
 };
 
-const DetailRow = ({ label, value }) => (
+const DetailRow = ({label, value}) => (
   <View style={styles.detailRow}>
     <Text style={styles.label}>{label}</Text>
-    <Text numberOfLines={1} style={styles.value}>{value}</Text>
+    <Text numberOfLines={1} style={styles.value}>
+      {value}
+    </Text>
   </View>
 );
 
@@ -72,7 +78,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 12,
-    gap:10
+    gap: 10,
   },
   label: {
     fontSize: 16,
